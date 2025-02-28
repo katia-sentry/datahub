@@ -35,8 +35,14 @@ jobs:
       postgres_setup_change: ${{ steps.ci-optimize.outputs.postgres-setup-change == 'true' }}
       elasticsearch_setup_change: ${{ steps.ci-optimize.outputs.elasticsearch-setup-change == 'true' }}
     steps:
-      - name: Check out the repo
-        uses: acryldata/sane-checkout-action@v3
+      -      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Set GH_COMMIT_SHA
+        run: echo "GH_COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+       
       - uses: ./.github/actions/ci-optimization
         id: ci-optimize
 
@@ -107,6 +113,8 @@ jobs:
             -x :metadata-integration:java:datahub-schematron:cli:test \
             --parallel
       - name: Gradle build (and test) for frontend
+      
+
         if: ${{  matrix.command == 'frontend' && needs.setup.outputs.frontend_change == 'true' }}
         run: |
           ./gradlew :datahub-frontend:build :datahub-web-react:build --parallel
